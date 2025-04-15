@@ -20,16 +20,19 @@
             }
 
             #sidebar {
-            width: 200px;
-            background-color: #252526;
-            color: #d4d4d4;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.3s ease;
-            height: 100vh;
-            }
+  width: 200px;
+  background-color: #252526;
+  color: #d4d4d4;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Centraliza verticalmente */
+  gap: 1rem;
+  transition: transform 0.3s ease;
+  height: 100vh;
+}
+
 
             #sidebar h3 {
             font-size: 1.2rem;
@@ -38,14 +41,18 @@
             }
 
             #file-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            }
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: center;
+}
+
 
             #file-list li {
             padding: 0.5rem;
             cursor: pointer;
+            
             transition: background-color 0.3s, transform 0.3s;
             }
 
@@ -101,7 +108,18 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
             }
+            .editor #css-editor {   
+            flex: 1;
+          display: flex;
+          flex-direction: column;
 
+
+            display: none;
+            padding: 1rem;
+            background-color: #333;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            }
             .editor.active {
             display: block;
             border: 2px solid #0e639c;
@@ -337,296 +355,235 @@ textarea {
   width: 8px;
 }
 
-
+.logo{
+    width: 70%;
+    
+}
         </style>
-        </head>
-        <body>
-        <button id="toggle-sidebar">☰</button>
+</head>
+<body>
+  <button id="toggle-sidebar">☰</button>
 
-        <div id="sidebar">
-            <h3>Arquivos</h3>
-            <button id="create-file">+ Criar Novo Arquivo</button>
-            <ul id="file-list">
-            <li class="active" data-type="html" onclick="selectFile('html')">index.html</li>
-            <li data-type="css" onclick="selectFile('css')">style.css</li>
-            <li data-type="js" onclick="selectFile('js')">script.js</li>
-            </ul>
+  <div id="sidebar">
+    <img class="logo" src="V.png" alt="logo">
+    <h3>Arquivos</h3>
+    <ul id="file-list">
+      <li class="active" data-type="html" onclick="selectFile('html')">index.html</li>
+      <li data-type="css" onclick="selectFile('css')">style.css</li>
+      <li data-type="js" onclick="selectFile('js')">script.js</li>
+    </ul>
+  </div>
+
+  <div id="main-content">
+    <div id="editors">
+      <!-- Editor HTML -->
+      <div class="editor active" id="html-editor">
+        <h4>HTML</h4>
+        <div class="code-container">
+          <div class="line-numbers" id="html-lines"></div>
+          <textarea id="html" placeholder="Escreva HTML aqui..."></textarea>
         </div>
+      </div>
 
-        <div id="main-content">
-
-            <div class="editor" id="html-editor">
-                <h4>HTML</h4>
-                <div class="code-container">
-                  <div class="line-numbers" id="html-lines"></div>
-                  <textarea id="html" placeholder="Escreva HTML aqui..."></textarea>
-                </div>
-              </div>
-              
-            </div>
-            <div class="editor" id="css-editor">
-                <h4>CSS</h4>
-                <textarea id="css" placeholder="Escreva CSS aqui..."></textarea>
-            </div>
-            <div class="editor" id="js-editor">
-                <h4>JS</h4>
-                <textarea id="js" placeholder="Escreva JS aqui..."></textarea>
-            </div>
-            </div>
-
-            <div id="preview-area">
-                <div id="action-bar">
-                  <button id="run">▶ Executar</button>
-                  <button id="save">💾 Salvar</button>
-                  <button id="clear">🧹 Limpar</button>
-                  <button id="export">📥 Exportar HTML</button>
-                </div>
-                <iframe id="preview"></iframe>
-              </div>
-              
-            
+      <!-- Editor CSS -->
+      <div class="editor" id="css-editor">
+        <h4>CSS</h4>
+        <div class="code-container">
+          <div class="line-numbers" id="css-lines"></div>
+          <textarea id="css" placeholder="Escreva CSS aqui..."></textarea>
         </div>
+      </div>
 
-        <script>
+      <!-- Editor JS -->
+      <div class="editor" id="js-editor">
+        <h4>JS</h4>
+        <div class="code-container">
+          <div class="line-numbers" id="js-lines"></div>
+          <textarea id="js" placeholder="Escreva JS aqui..."></textarea>
+        </div>
+      </div>
+    </div>
 
+    <!-- Área de visualização -->
+    <div id="preview-area">
+      <div id="action-bar">
+        <button id="run">▶ Executar</button>
+        <button id="save">💾 Salvar</button>
+        <button id="clear">🧹 Limpar</button>
+        <button id="export">📥 Exportar HTML</button>
+      </div>
+      <iframe id="preview"></iframe>
+    </div>
+  </div>
 
+  <script>
+    const html = document.getElementById('html');
+    const css = document.getElementById('css');
+    const js = document.getElementById('js');
+    const preview = document.getElementById('preview');
+    const fileList = document.getElementById('file-list');
+    const createFileBtn = document.getElementById('create-file');
+    const toggleSidebar = document.getElementById('toggle-sidebar');
+    const saveBtn = document.getElementById('save');
+    const clearBtn = document.getElementById('clear');
+    const exportBtn = document.getElementById('export');
+    const runBtn = document.getElementById('run');
 
-            const html = document.getElementById('html');
-            const css = document.getElementById('css');
-            const js = document.getElementById('js');
-            const preview = document.getElementById('preview');
-            const run = document.getElementById('run');
-            const fileList = document.getElementById('file-list');
-            const createFileBtn = document.getElementById('create-file');
-            const toggleSidebar = document.getElementById('toggle-sidebar');
+    let currentFile = 'html';
 
-            let currentFile = 'html';
+    window.addEventListener('DOMContentLoaded', () => {
+      html.value = localStorage.getItem('html') || '';
+      css.value = localStorage.getItem('css') || '';
+      js.value = localStorage.getItem('js') || '';
+      updateEditor();
+      setupEditor('html', 'html-lines');
+      setupEditor('css', 'css-lines');
+      setupEditor('js', 'js-lines');
+      setupAutoCloseTags(html);
+      setupAutoCloseTags(css);
+      setupAutoCloseTags(js);
+    });
 
-            // Função para rodar o código
-            run.onclick = () => {
-            const code = `
-                <html>
-                <head>
-                    <style>${css.value}</style>
-                </head>
-                <body>
-                    ${html.value}
-                    <script>${js.value}<\/script>
-                </body>
-                </html>
-            `;
-            preview.srcdoc = code;
-            };
-
-            // Função para selecionar o arquivo
-            function selectFile(fileType) {
-            currentFile = fileType;
-            const files = document.querySelectorAll('#file-list li');
-            files.forEach(file => file.classList.remove('active'));
-            const activeFile = document.querySelector(`li[data-type="${fileType}"]`);
-            activeFile.classList.add('active');
-            updateEditor();
-            }
-
-            // Atualiza o editor conforme o arquivo selecionado
-            function updateEditor() {
-            const htmlEditor = document.getElementById('html-editor');
-            const cssEditor = document.getElementById('css-editor');
-            const jsEditor = document.getElementById('js-editor');
-
-            htmlEditor.classList.remove('active');
-            cssEditor.classList.remove('active');
-            jsEditor.classList.remove('active');
-
-            if (currentFile === 'html') {
-                htmlEditor.classList.add('active');
-                if (!html.value) {
-                html.value = `
+    runBtn.addEventListener('click', () => {
+      const code = `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
+          <meta charset="UTF-8">
+          <style>${css.value}</style>
         </head>
         <body>
-        
+          ${html.value}
+          <script>${js.value}<\/script>
         </body>
         </html>
-                `;
-                }
-            } else if (currentFile === 'css') {
-                cssEditor.classList.add('active');
-            } else {
-                jsEditor.classList.add('active');
-            }
-            }
+      `;
+      preview.srcdoc = code;
+    });
 
-            // Criar novo arquivo
-            createFileBtn.onclick = () => {
-            const fileName = prompt('Nome do novo arquivo (exemplo: newfile.html):');
-            if (fileName) {
-                const newFileType = fileName.split('.').pop();
-                const newFileElement = document.createElement('li');
-                newFileElement.textContent = fileName;
-                newFileElement.dataset.type = newFileType;
-                newFileElement.onclick = () => selectFile(newFileType);
-                fileList.appendChild(newFileElement);
-            }
-            };
+    function selectFile(fileType) {
+      currentFile = fileType;
+      document.querySelectorAll('#file-list li').forEach(li => li.classList.remove('active'));
+      document.querySelector(`li[data-type="${fileType}"]`).classList.add('active');
+      updateEditor();
+    }
 
-            // Toggle do painel lateral
-            toggleSidebar.onclick = () => {
-            document.getElementById('sidebar').classList.toggle('open');
-            };
+    function updateEditor() {
+      document.querySelectorAll('.editor').forEach(e => e.classList.remove('active'));
+      if (currentFile === 'html') {
+        document.getElementById('html-editor').classList.add('active');
+      } else if (currentFile === 'css') {
+        document.getElementById('css-editor').classList.add('active');
+      } else {
+        document.getElementById('js-editor').classList.add('active');
+      }
+    }
 
-            // Inicializa o editor com o arquivo HTML
-            updateEditor();
+    createFileBtn.addEventListener('click', () => {
+      const fileName = prompt('Nome do novo arquivo (ex: novo.html):');
+      if (fileName) {
+        const fileType = fileName.split('.').pop();
+        const li = document.createElement('li');
+        li.textContent = fileName;
+        li.dataset.type = fileType;
+        li.addEventListener('click', () => selectFile(fileType));
+        fileList.appendChild(li);
+      }
+    });
 
-            document.getElementById('save').onclick = () => {
+    toggleSidebar.addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+
+    saveBtn.addEventListener('click', () => {
+      try {
         localStorage.setItem('html', html.value);
         localStorage.setItem('css', css.value);
         localStorage.setItem('js', js.value);
-        alert('Código salvo!');
-        };
+        alert('✅ Código salvo com sucesso!');
+      } catch (e) {
+        console.error('Erro ao salvar:', e);
+        alert('❌ Erro ao salvar');
+      }
+    });
 
-        document.getElementById('clear').onclick = () => {
-        if (confirm('Tem certeza que deseja limpar todos os campos?')) {
-            html.value = '';
-            css.value = '';
-            js.value = '';
-        }
-        };
-        function updateLineNumbers(textarea, lineNumberElem) {
-  const lines = textarea.value.split('\n').length;
-  lineNumberElem.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
-}
+    clearBtn.addEventListener('click', () => {
+      if (confirm('Tem certeza que deseja limpar tudo?')) {
+        html.value = '';
+        css.value = '';
+        js.value = '';
+      }
+    });
 
-function setupEditor(textareaId, lineId) {
-  const textarea = document.getElementById(textareaId);
-  const lineNumbers = document.getElementById(lineId);
-
-  textarea.addEventListener('input', () => updateLineNumbers(textarea, lineNumbers));
-  textarea.addEventListener('scroll', () => {
-    lineNumbers.scrollTop = textarea.scrollTop;
-  });
-
-  updateLineNumbers(textarea, lineNumbers); // inicial
-}
-
-setupEditor('html', 'html-lines');
-setupEditor('css', 'css-lines');
-setupEditor('js', 'js-lines');
-
-        document.getElementById('export').onclick = () => {
-        const fullHTML = `
+    exportBtn.addEventListener('click', () => {
+      const content = `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
-        <meta charset="UTF-8">
-        <title>Exported Page</title>
-        <style>${css.value}</style>
+          <meta charset="UTF-8">
+          <title>Exported Page</title>
+          <style>${css.value}</style>
         </head>
         <body>
-        ${html.value}
-        <script>${js.value}<\/script>
+          ${html.value}
+          <script>${js.value}<\/script>
         </body>
         </html>
-        `;
-        const blob = new Blob([fullHTML], { type: 'text/html' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'pagina-exportada.html';
-        a.click();
-        };
+      `;
+      const blob = new Blob([content], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'pagina-exportada.html';
+      a.click();
+    });
 
-        // Carrega os dados salvos, se existirem
-window.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('html')) html.value = localStorage.getItem('html');
-  if (localStorage.getItem('css')) css.value = localStorage.getItem('css');
-  if (localStorage.getItem('js')) js.value = localStorage.getItem('js');
-});
+    function setupAutoCloseTags(textarea) {
+      textarea.addEventListener('keydown', function (e) {
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+        const value = this.value;
 
-function setupAutoCloseTags(textarea) {
-  textarea.addEventListener('keydown', function (e) {
-    const start = this.selectionStart;
-    const end = this.selectionEnd;
-    const value = this.value;
+        if (e.key === '>') {
+          const before = value.slice(0, start);
+          const match = before.match(/<(\w+)$/);
+          const selfClosing = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'];
 
-    // Auto fechamento de tags HTML
-    if (e.key === '>') {
-      const before = value.slice(0, start);
-      const match = before.match(/<([a-zA-Z0-9]+)>$/);
+          if (match && !selfClosing.includes(match[1].toLowerCase())) {
+            e.preventDefault();
+            const tag = match[1];
+            const closeTag = `></${tag}>`;
+            this.value = before + closeTag + value.slice(end);
+            this.setSelectionRange(start + 1, start + 1);
+          }
+        }
 
-      if (match) {
-        e.preventDefault();
-        const tag = match[1];
-        const after = value.slice(end);
-        const openTag = `<${tag}>`;
-        const closeTag = `</${tag}>`;
-
-        this.value = before + closeTag + after;
-        this.setSelectionRange(before.length, before.length);
-      }
+        const pairs = { '"': '"', "'": "'", '(': ')', '[': ']', '{': '}' };
+        if (pairs[e.key]) {
+          e.preventDefault();
+          const open = e.key;
+          const close = pairs[e.key];
+          this.value = value.slice(0, start) + open + close + value.slice(end);
+          this.setSelectionRange(start + 1, start + 1);
+        }
+      });
     }
 
-    // Auto fechar pares: "", '', (), [], {}
-    const pairs = {
-      '"': '"',
-      "'": "'",
-      '(': ')',
-      '[': ']',
-      '{': '}'
-    };
-
-    if (pairs[e.key]) {
-      e.preventDefault();
-      const open = e.key;
-      const close = pairs[e.key];
-
-      this.value = value.slice(0, start) + open + close + value.slice(end);
-      this.setSelectionRange(start + 1, start + 1);
+    function updateLineNumbers(textarea, lineElement) {
+      const lines = textarea.value.split('\n').length;
+      lineElement.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
     }
-  });
-}
 
-// Ativa nos editores
-setupAutoCloseTags(document.getElementById('html'));
-setupAutoCloseTags(document.getElementById('css'));
-setupAutoCloseTags(document.getElementById('js'));
+    function setupEditor(textareaId, lineId) {
+      const textarea = document.getElementById(textareaId);
+      const lineNumbers = document.getElementById(lineId);
 
-html.addEventListener('keydown', function (e) {
-  if (e.key === '>' && !e.ctrlKey && !e.metaKey) {
-    const cursorPos = html.selectionStart;
-    const value = html.value;
-    const beforeCursor = value.slice(0, cursorPos);
-    const afterCursor = value.slice(cursorPos);
+      textarea.addEventListener('input', () => updateLineNumbers(textarea, lineNumbers));
+      textarea.addEventListener('scroll', () => {
+        lineNumbers.scrollTop = textarea.scrollTop;
+      });
 
-    // Regex para detectar tags como <div>
-    const tagMatch = beforeCursor.match(/<(\w+)$/);
-    const selfClosingTags = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'];
-
-    if (tagMatch) {
-      const tagName = tagMatch[1];
-
-      if (!selfClosingTags.includes(tagName.toLowerCase())) {
-        // Impede o caractere padrão de aparecer agora
-        e.preventDefault();
-
-        // Insere a tag fechando e posiciona o cursor no meio
-        const tagClose = `></${tagName}>`;
-        const newValue = beforeCursor + tagClose + afterCursor;
-        html.value = newValue;
-
-        // Reposiciona o cursor entre as tags
-        const newCursorPos = beforeCursor.length + 1;
-        html.setSelectionRange(newCursorPos, newCursorPos);
-      }
+      updateLineNumbers(textarea, lineNumbers);
     }
-  }
-});
-
-        </script>
-        </body>
-        </html>
-            
+  </script>
+</body>
+</html>
