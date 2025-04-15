@@ -89,7 +89,12 @@
             width: 50%;
             }
 
-            .editor {
+            .editor {   
+            flex: 1;
+          display: flex;
+          flex-direction: column;
+
+
             display: none;
             padding: 1rem;
             background-color: #333;
@@ -107,13 +112,17 @@
             textarea {
             background-color: #333;
             color: #dcdcdc;
+            
             border: 1px solid #444;
             border-radius: 8px;
             padding: 1rem;
             font-family: 'Fira Code', monospace;
             font-size: 14px;
             resize: none;
-            height: 300px;
+  height: 500px; /* ou o valor que preferir */
+  max-height: 70vh; /* cresce até 70% da altura da tela */
+
+
             width: 100%;
             margin-top: 1rem;
             }
@@ -193,57 +202,140 @@
         }
 
 
-            #toggle-sidebar {
-            background-color: #0e639c;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            color: white;
-            font-size: 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
-            display: none;
-            }
+        #toggle-sidebar {
+  background-color: #0e639c;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  color: white;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 101;
+  display: none;
+}
+
 
             #toggle-sidebar:hover {
             background-color: #1177bb;
             }
 
             @media (max-width: 768px) {
-            #sidebar {
-                transform: translateX(-200px);
-            }
+  body {
+    flex-direction: column;
+    overflow-y: auto;
+  }
 
-            #sidebar.open {
-                transform: translateX(0);
-            }
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(-200px);
+    height: 100%;
+    z-index: 100;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+  }
 
-            #main-content {
-                flex-direction: column;
-            }
+  #sidebar.open {
+    transform: translateX(0);
+  }
 
-            #editors {
-                flex-direction: column;
-            }
+  #toggle-sidebar {
+    display: block;
+  }
 
-            #toggle-sidebar {
-                display: block;
-            }
+  #main-content {
+    flex-direction: column;
+    padding: 0.5rem;
+  }
 
-            #preview {
-                height: 50vh;
-                margin-left: 0;
-                width: 100%;
-                margin-top: 1rem;
-            }
+  #editors {
+    width: 100%;
+    flex-direction: column;
+  }
 
-            #run {
-                width: 100%;
-            }
-            }
+  .editor {
+    height: auto;
+  }
+
+  textarea {
+    height: 200px;
+  }
+
+  #preview-area {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  #preview {
+    width: 100%;
+    height: 300px;
+    margin-top: 0.5rem;
+    border-left: none;
+  }
+
+  #action-bar {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  #action-bar button {
+    flex: 1 1 45%;
+  }
+
+  #run {
+    margin-left: 0;
+  }
+}
+
+.code-container {
+  display: flex;
+  width: 100%;
+  position: relative;
+}
+
+.line-numbers {
+  background-color: #1e1e1e;
+  color: #888;
+  padding: 1rem 0.5rem;
+  text-align: right;
+  user-select: none;
+  font-size: 14px;
+  font-family: 'Fira Code', monospace;
+  border-right: 1px solid #444;
+}
+
+.line-numbers::after {
+  content: '';
+  display: block;
+  height: 100%;
+}
+
+textarea {
+  flex: 1;
+  border: none;
+  padding: 1rem;
+  resize: none;
+  outline: none;
+  overflow: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  background-color: #1e1e1e;
+  color: #dcdcdc;
+  border-radius: 0 8px 8px 0;
+}
+
+.code-container textarea {
+  border-left: none;
+  margin: 0;
+}
+
+.editor textarea::-webkit-scrollbar {
+  width: 8px;
+}
 
 
         </style>
@@ -263,10 +355,14 @@
 
         <div id="main-content">
 
-            <div id="editors">
             <div class="editor" id="html-editor">
                 <h4>HTML</h4>
-                <textarea id="html" placeholder="Escreva HTML aqui..."></textarea>
+                <div class="code-container">
+                  <div class="line-numbers" id="html-lines"></div>
+                  <textarea id="html" placeholder="Escreva HTML aqui..."></textarea>
+                </div>
+              </div>
+              
             </div>
             <div class="editor" id="css-editor">
                 <h4>CSS</h4>
@@ -292,6 +388,9 @@
         </div>
 
         <script>
+
+
+
             const html = document.getElementById('html');
             const css = document.getElementById('css');
             const js = document.getElementById('js');
@@ -398,6 +497,26 @@
             js.value = '';
         }
         };
+        function updateLineNumbers(textarea, lineNumberElem) {
+  const lines = textarea.value.split('\n').length;
+  lineNumberElem.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
+}
+
+function setupEditor(textareaId, lineId) {
+  const textarea = document.getElementById(textareaId);
+  const lineNumbers = document.getElementById(lineId);
+
+  textarea.addEventListener('input', () => updateLineNumbers(textarea, lineNumbers));
+  textarea.addEventListener('scroll', () => {
+    lineNumbers.scrollTop = textarea.scrollTop;
+  });
+
+  updateLineNumbers(textarea, lineNumbers); // inicial
+}
+
+setupEditor('html', 'html-lines');
+setupEditor('css', 'css-lines');
+setupEditor('js', 'js-lines');
 
         document.getElementById('export').onclick = () => {
         const fullHTML = `
@@ -428,6 +547,84 @@ window.addEventListener('DOMContentLoaded', () => {
   if (localStorage.getItem('js')) js.value = localStorage.getItem('js');
 });
 
+function setupAutoCloseTags(textarea) {
+  textarea.addEventListener('keydown', function (e) {
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+    const value = this.value;
+
+    // Auto fechamento de tags HTML
+    if (e.key === '>') {
+      const before = value.slice(0, start);
+      const match = before.match(/<([a-zA-Z0-9]+)>$/);
+
+      if (match) {
+        e.preventDefault();
+        const tag = match[1];
+        const after = value.slice(end);
+        const openTag = `<${tag}>`;
+        const closeTag = `</${tag}>`;
+
+        this.value = before + closeTag + after;
+        this.setSelectionRange(before.length, before.length);
+      }
+    }
+
+    // Auto fechar pares: "", '', (), [], {}
+    const pairs = {
+      '"': '"',
+      "'": "'",
+      '(': ')',
+      '[': ']',
+      '{': '}'
+    };
+
+    if (pairs[e.key]) {
+      e.preventDefault();
+      const open = e.key;
+      const close = pairs[e.key];
+
+      this.value = value.slice(0, start) + open + close + value.slice(end);
+      this.setSelectionRange(start + 1, start + 1);
+    }
+  });
+}
+
+// Ativa nos editores
+setupAutoCloseTags(document.getElementById('html'));
+setupAutoCloseTags(document.getElementById('css'));
+setupAutoCloseTags(document.getElementById('js'));
+
+html.addEventListener('keydown', function (e) {
+  if (e.key === '>' && !e.ctrlKey && !e.metaKey) {
+    const cursorPos = html.selectionStart;
+    const value = html.value;
+    const beforeCursor = value.slice(0, cursorPos);
+    const afterCursor = value.slice(cursorPos);
+
+    // Regex para detectar tags como <div>
+    const tagMatch = beforeCursor.match(/<(\w+)$/);
+    const selfClosingTags = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'];
+
+    if (tagMatch) {
+      const tagName = tagMatch[1];
+
+      if (!selfClosingTags.includes(tagName.toLowerCase())) {
+        // Impede o caractere padrão de aparecer agora
+        e.preventDefault();
+
+        // Insere a tag fechando e posiciona o cursor no meio
+        const tagClose = `></${tagName}>`;
+        const newValue = beforeCursor + tagClose + afterCursor;
+        html.value = newValue;
+
+        // Reposiciona o cursor entre as tags
+        const newCursorPos = beforeCursor.length + 1;
+        html.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    }
+  }
+});
 
         </script>
         </body>
