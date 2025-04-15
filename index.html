@@ -443,6 +443,26 @@ textarea {
       setupAutoCloseTags(css);
       setupAutoCloseTags(js);
     });
+    saveBtn.addEventListener('click', () => {
+  try {
+    localStorage.setItem('html', html.value);
+    localStorage.setItem('css', css.value);
+    localStorage.setItem('js', js.value);
+    alert('✅ Código salvo com sucesso!');
+  } catch (e) {
+    console.error('Erro ao salvar:', e);
+    alert('❌ Erro ao salvar o código.');
+  }
+});
+clearBtn.addEventListener('click', () => {
+  if (confirm('Tem certeza que deseja limpar tudo?')) {
+    html.value = '';
+    css.value = '';
+    js.value = '';
+
+    alert('🧹 Código limpo com sucesso!');
+  }
+});
 
     runBtn.addEventListener('click', () => {
       const code = `
