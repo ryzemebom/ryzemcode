@@ -1,275 +1,166 @@
-const html = document.getElementById('html');
-const css = document.getElementById('css');
-const js = document.getElementById('js');
-const preview = document.getElementById('preview');
+// Seleção dos elementos
 const fileList = document.getElementById('file-list');
-const createFileBtn = document.getElementById('create-file');
-const toggleSidebar = document.getElementById('toggle-sidebar');
+const fileItems = fileList.querySelectorAll('li');
+const editors = document.querySelectorAll('.editor');
+const htmlEditor = document.getElementById('html');
+const cssEditor = document.getElementById('css');
+const jsEditor = document.getElementById('js');
+const htmlLines = document.getElementById('html-lines');
+const cssLines = document.getElementById('css-lines');
+const jsLines = document.getElementById('js-lines');
+const preview = document.getElementById('preview');
+
+const runBtn = document.getElementById('run');
 const saveBtn = document.getElementById('save');
 const clearBtn = document.getElementById('clear');
 const exportBtn = document.getElementById('export');
-const runBtn = document.getElementById('run');
+const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+const sidebar = document.getElementById('sidebar');
+const mainContent = document.querySelector('.container'); // container principal
 
-let currentFile = 'html';
+// Função para alternar editores
+function selectFile(type) {
+  editors.forEach(ed => ed.classList.remove('active'));
+  fileItems.forEach(item => item.classList.remove('active'));
 
-window.addEventListener('DOMContentLoaded', () => {
-  html.value = localStorage.getItem('html') || '';
-  css.value = localStorage.getItem('css') || '';
-  js.value = localStorage.getItem('js') || '';
-  updateEditor();
-  setupEditor('html', 'html-lines');
-  setupEditor('css', 'css-lines');
-  setupEditor('js', 'js-lines');
-  setupAutoCloseTags(html);
-  setupAutoCloseTags(css);
-  setupAutoCloseTags(js);
-});
-saveBtn.addEventListener('click', () => {
-try {
-localStorage.setItem('html', html.value);
-localStorage.setItem('css', css.value);
-localStorage.setItem('js', js.value);
-alert('✅ Código salvo com sucesso!');
-} catch (e) {
-console.error('Erro ao salvar:', e);
-alert('❌ Erro ao salvar o código.');
+  const editor = document.getElementById(type + '-editor');
+  if (editor) editor.classList.add('active');
+
+  const selectedItem = Array.from(fileItems).find(item => item.dataset.type === type);
+  if (selectedItem) selectedItem.classList.add('active');
 }
-});
-clearBtn.addEventListener('click', () => {
-if (confirm('Tem certeza que deseja limpar tudo?')) {
-html.value = '';
-css.value = '';
-js.value = '';
 
-alert('🧹 Código limpo com sucesso!');
+// Atualiza linhas numeradas para um editor
+function updateLineNumbers(textarea, linesContainer) {
+  const linesCount = textarea.value.split('\n').length;
+  let linesHTML = '';
+  for (let i = 1; i <= linesCount; i++) {
+    linesHTML += i + '\n';
+  }
+  linesContainer.textContent = linesHTML;
 }
-});
 
-runBtn.addEventListener('click', () => {
-  const code = `
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-      <meta charset="UTF-8">
-      <style>${css.value}</style>
-    </head>
-    <body>
-      ${html.value}
-      <script>${js.value}<\/script>
-    </body>
-    </html>
-  `;
-  preview.srcdoc = code;
-});
-downloadBtn.addEventListener('click', () => {
-const htmlContent = html.value;
-const cssContent = `<style>${css.value}</style>`;
-const jsContent = `<script>${js.value}<\/script>`;
+// Inicializa linhas para todos os editores
+function initLineNumbers() {
+  updateLineNumbers(htmlEditor, htmlLines);
+  updateLineNumbers(cssEditor, cssLines);
+  updateLineNumbers(jsEditor, jsLines);
+}
 
-const fullPage = `
+// Atualiza preview iframe com código completo
+function updatePreview() {
+  const html = htmlEditor.value;
+  const css = cssEditor.value;
+  const js = jsEditor.value;
+
+  const srcDoc = `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projeto</title>
-  ${cssContent}
+<meta charset="UTF-8" />
+<style>${css}</style>
 </head>
 <body>
-  ${htmlContent}
-  ${jsContent}
+${html}
+<script>${js}<\/script>
 </body>
-</html>
-`;
+</html>`;
 
-const blob = new Blob([fullPage], { type: 'text/html' });
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url;
-a.download = 'pagina.html';
-a.click();
-URL.revokeObjectURL(url);
-});
-
-function selectFile(fileType) {
-  currentFile = fileType;
-  document.querySelectorAll('#file-list li').forEach(li => li.classList.remove('active'));
-  document.querySelector(`li[data-type="${fileType}"]`).classList.add('active');
-  updateEditor();
+  preview.srcdoc = srcDoc;
 }
 
-function updateEditor() {
-  document.querySelectorAll('.editor').forEach(e => e.classList.remove('active'));
-  if (currentFile === 'html') {
-    document.getElementById('html-editor').classList.add('active');
-  } else if (currentFile === 'css') {
-    document.getElementById('css-editor').classList.add('active');
-  } else {
-    document.getElementById('js-editor').classList.add('active');
-  }
-}
-downloadBtn.addEventListener('click', () => {
-const htmlContent = html.value;
-const cssContent = `<style>${css.value}</style>`;
-const jsContent = `<script>${js.value}<\/script>`;
-
-const fullPage = `
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projeto</title>
-  ${cssContent}
-</head>
-<body>
-  ${htmlContent}
-  ${jsContent}
-</body>
-</html>
-`;
-
-const blob = new Blob([fullPage], { type: 'text/html' });
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url;
-a.download = 'pagina.html';
-a.click();
-URL.revokeObjectURL(url);
-});
-
-createFileBtn.addEventListener('click', () => {
-  const fileName = prompt('Nome do novo arquivo (ex: novo.html):');
-  if (fileName) {
-    const fileType = fileName.split('.').pop();
-    const li = document.createElement('li');
-    li.textContent = fileName;
-    li.dataset.type = fileType;
-    li.addEventListener('click', () => selectFile(fileType));
-    fileList.appendChild(li);
-  }
-});
-
-toggleSidebar.addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('open');
-});
-
-saveBtn.addEventListener('click', () => {
-  try {
-    localStorage.setItem('html', html.value);
-    localStorage.setItem('css', css.value);
-    localStorage.setItem('js', js.value);
-    alert('✅ Código salvo com sucesso!');
-  } catch (e) {
-    console.error('Erro ao salvar:', e);
-    alert('❌ Erro ao salvar');
-  }
-});
-
-clearBtn.addEventListener('click', () => {
-  if (confirm('Tem certeza que deseja limpar tudo?')) {
-    html.value = '';
-    css.value = '';
-    js.value = '';
-  }
-});
-
-exportBtn.addEventListener('click', () => {
-  const content = `
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-      <meta charset="UTF-8">
-      <title>Exported Page</title>
-      <style>${css.value}</style>
-    </head>
-    <body>
-      ${html.value}
-      <script>${js.value}<\/script>
-    </body>
-    </html>
-  `;
-  const blob = new Blob([content], { type: 'text/html' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'pagina-exportada.html';
-  a.click();
-});
-
-function setupAutoCloseTags(textarea) {
-  textarea.addEventListener('keydown', function (e) {
-    const start = this.selectionStart;
-    const end = this.selectionEnd;
-    const value = this.value;
-
-    if (e.key === '>') {
-      const before = value.slice(0, start);
-      const match = before.match(/<(\w+)$/);
-      const selfClosing = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'];
-
-      if (match && !selfClosing.includes(match[1].toLowerCase())) {
-        e.preventDefault();
-        const tag = match[1];
-        const closeTag = `></${tag}>`;
-        this.value = before + closeTag + value.slice(end);
-        this.setSelectionRange(start + 1, start + 1);
-      }
-    }
-
-    const pairs = { '"': '"', "'": "'", '(': ')', '[': ']', '{': '}' };
-    if (pairs[e.key]) {
-      e.preventDefault();
-      const open = e.key;
-      const close = pairs[e.key];
-      this.value = value.slice(0, start) + open + close + value.slice(end);
-      this.setSelectionRange(start + 1, start + 1);
-    }
-  });
-}
-
-function updateLineNumbers(textarea, lineElement) {
-  const lines = textarea.value.split('\n').length;
-  lineElement.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
-}
-
-function setupEditor(textareaId, lineId) {
-  const textarea = document.getElementById(textareaId);
-  const lineNumbers = document.getElementById(lineId);
-
-  textarea.addEventListener('input', () => updateLineNumbers(textarea, lineNumbers));
-  textarea.addEventListener('scroll', () => {
-    lineNumbers.scrollTop = textarea.scrollTop;
-  });
-
-  updateLineNumbers(textarea, lineNumbers);
-}
+// Função executar (atualiza preview)
 function runCode() {
-const html = document.getElementById("html-editor").value;
-const css = document.getElementById("css-editor").value;
-const js = document.getElementById("js-editor").value;
+  updatePreview();
+}
 
-const output = `
+// Função salvar no localStorage
+function saveCode() {
+  localStorage.setItem('miniVS_html', htmlEditor.value);
+  localStorage.setItem('miniVS_css', cssEditor.value);
+  localStorage.setItem('miniVS_js', jsEditor.value);
+  alert('Código salvo localmente!');
+}
+
+// Função limpar editores
+function clearCode() {
+  if (confirm('Tem certeza que deseja limpar todo o código?')) {
+    htmlEditor.value = '';
+    cssEditor.value = '';
+    jsEditor.value = '';
+    initLineNumbers();
+    updatePreview();
+  }
+}
+
+// Função exportar código HTML completo para download
+function exportHTML() {
+  const html = htmlEditor.value;
+  const css = cssEditor.value;
+  const js = jsEditor.value;
+
+  const content = `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <style>${css}</style>
+<meta charset="UTF-8" />
+<title>Exportado pelo Mini VS Code</title>
+<style>
+${css}
+</style>
 </head>
 <body>
-  ${html}
-  <script>${js}<\/script>
+${html}
+<script>
+${js}
+<\/script>
 </body>
-</html>
-`;
+</html>`.trim();
 
-const iframe = document.getElementById("output-frame");
-iframe.srcdoc = output;
+  const blob = new Blob([content], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'meu-projeto.html';
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
-window.addEventListener("DOMContentLoaded", function () {
-document.addEventListener('keydown', function(e) {
-if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-  e.preventDefault();
-  runCode();
+
+// Toggle sidebar visibilidade
+function toggleSidebar() {
+  sidebar.classList.toggle('hidden');
 }
-});
+
+// Event listeners para troca de arquivos
+fileItems.forEach(item => {
+  item.addEventListener('click', () => {
+    selectFile(item.dataset.type);
+  });
 });
 
+// Event listeners para textarea input - atualizar linhas numeradas em tempo real
+htmlEditor.addEventListener('input', () => updateLineNumbers(htmlEditor, htmlLines));
+cssEditor.addEventListener('input', () => updateLineNumbers(cssEditor, cssLines));
+jsEditor.addEventListener('input', () => updateLineNumbers(jsEditor, jsLines));
+
+// Botões
+runBtn.addEventListener('click', runCode);
+saveBtn.addEventListener('click', saveCode);
+clearBtn.addEventListener('click', clearCode);
+exportBtn.addEventListener('click', exportHTML);
+toggleSidebarBtn.addEventListener('click', toggleSidebar);
+
+// Ao carregar, inicia linhas numeradas e carrega código salvo se existir
+window.addEventListener('load', () => {
+  if(localStorage.getItem('miniVS_html')) htmlEditor.value = localStorage.getItem('miniVS_html');
+  if(localStorage.getItem('miniVS_css')) cssEditor.value = localStorage.getItem('miniVS_css');
+  if(localStorage.getItem('miniVS_js')) jsEditor.value = localStorage.getItem('miniVS_js');
+
+  initLineNumbers();
+  updatePreview();
+  selectFile('html'); // abre HTML por padrão
+});

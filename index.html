@@ -1,30 +1,35 @@
-        <!DOCTYPE html>
-        <html lang="pt-BR">
-        <head>
-        <meta charset="UTF-8">
-        <title>Mini VS Code Web</title>
-        <link rel="stylesheet" href="style.css">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini VS Code Web</title>
+  <link rel="stylesheet" href="style.css" />
+  
 </head>
 <body>
-  <button id="toggle-sidebar">☰</button>
+  <header>
+    <button id="toggle-sidebar" title="Alternar menu lateral">☰</button>
+  </header>
 
-  <div id="sidebar">
-    <img class="logo" src="V.png" alt="logo">
-    <h3>Arquivos</h3>
-    <ul id="file-list">
-      <li class="active" data-type="html" onclick="selectFile('html')">index.html</li>
-      <li data-type="css" onclick="selectFile('css')">style.css</li>
-      <li data-type="js" onclick="selectFile('js')">script.js</li>
-    </ul>
-  </div>
+  <div class="container">
+    <!-- Menu lateral -->
+    <nav id="sidebar">
+      <img class="logo" src="V.png" alt="logo" />
+      <h3>Arquivos</h3>
+      <ul id="file-list">
+        <li class="active" data-type="html" onclick="selectFile('html')">index.html</li>
+        <li data-type="css" onclick="selectFile('css')">style.css</li>
+        <li data-type="js" onclick="selectFile('js')">script.js</li>
+      </ul>
+    </nav>
 
-  <div id="main-content">
-    <div id="editors">
+    <!-- Área dos editores -->
+    <section id="editors">
       <!-- Editor HTML -->
       <div class="editor active" id="html-editor">
         <h4>HTML</h4>
         <div class="code-container">
-          <div class="line-numbers" id="html-lines"></div>
+
           <textarea id="html" placeholder="Escreva HTML aqui..."></textarea>
         </div>
       </div>
@@ -33,7 +38,7 @@
       <div class="editor" id="css-editor">
         <h4>CSS</h4>
         <div class="code-container">
-          <div class="line-numbers" id="css-lines"></div>
+
           <textarea id="css" placeholder="Escreva CSS aqui..."></textarea>
         </div>
       </div>
@@ -42,22 +47,22 @@
       <div class="editor" id="js-editor">
         <h4>JS</h4>
         <div class="code-container">
-          <div class="line-numbers" id="js-lines"></div>
+
           <textarea id="js" placeholder="Escreva JS aqui..."></textarea>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Área de visualização -->
-    <div id="preview-area">
+    <section id="preview-area">
       <div id="action-bar">
         <button id="run">▶ Executar</button>
         <button id="save">💾 Salvar</button>
         <button id="clear">🧹 Limpar</button>
         <button id="export">📥 Exportar HTML</button>
       </div>
-      <iframe id="preview"></iframe>
-    </div>
+      <iframe id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
+    </section>
   </div>
 
   <script src="script.js"></script>
